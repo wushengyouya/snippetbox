@@ -10,7 +10,7 @@ import (
 func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.URL.Query().Get("id"))
 	if err != nil || id < 1 {
-		http.NotFound(w, r)
+		app.notFound(w)
 		return
 	}
 	fmt.Fprintf(w, "查看片段 %d", id)
@@ -28,7 +28,7 @@ func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
-		http.NotFound(w, r)
+		app.notFound(w)
 		return
 	}
 	files := []string{
@@ -39,11 +39,12 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	// 读取模版文件
 	ts, err := template.ParseFiles(files...)
 	if err != nil {
-		http.Error(w, "Internal Server Error: parsefiles", http.StatusInternalServerError)
+		app.serverError(w, err)
 		return
 	}
-	if err := ts.ExecuteTemplate(w, "base", nil); err != nil {
-		http.Error(w, "Internal Server Error: ExecuteTemplate", http.StatusInternalServerError)
 
+	// 执行模版文件
+	if err := ts.ExecuteTemplate(w, "base", nil); err != nil {
+		app.serverError(w, err)
 	}
 }

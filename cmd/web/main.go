@@ -3,16 +3,22 @@ package main
 import (
 	"database/sql"
 	"flag"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
+	"snippetbox.alexedwards.net/internal/models"
 )
 
 type application struct {
-	errorLog *log.Logger
-	infoLog  *log.Logger
+	// 数据操纵model
+	snippets *models.SnippetModel
+	// 页面模版缓存，避免每次请求要获取页面
+	templateCache map[string]*template.Template
+	errorLog      *log.Logger
+	infoLog       *log.Logger
 }
 
 func main() {
@@ -22,27 +28,32 @@ func main() {
 
 	// 初始化日志
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
-	errorLOg := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
 	db, err := openDB(*dsn)
 	if err != nil {
-		errorLOg.Fatal(err)
+		errorLog.Fatal(err)
 	}
 	defer db.Close()
-
+	templateCache, err := newTemplateCache()
+	if err != nil {
+		errorLog.Fatal(err)
+	}
 	app := &application{
-		infoLog:  infoLog,
-		errorLog: errorLOg,
+		snippets:      &models.SnippetModel{DB: db},
+		templateCache: templateCache,
+		infoLog:       infoLog,
+		errorLog:      errorLog,
 	}
 
 	srv := http.Server{
 		Addr:     *addr,
 		Handler:  app.routes(),
-		ErrorLog: errorLOg,
+		ErrorLog: errorLog,
 	}
 
 	infoLog.Printf("服务启动于: %s", *addr)
-	errorLOg.Fatal(srv.ListenAndServe())
+	errorLog.Fatal(srv.ListenAndServe())
 }
 
 // 打开数据库连接

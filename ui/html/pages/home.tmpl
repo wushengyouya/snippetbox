@@ -1,8 +1,15 @@
 {{template "base" .}}
-
 {{define "title"}}Home{{end}}
-
 {{define "main"}}
 <h1>Latest snippets</h1>
-<p>Snippetbox 已经可以渲染 HTML 模板。</p>
+{{if .Snippets}}
+  {{range .Snippets}}
+  <article>
+    <h2><a href="/snippet/view?id={{.ID}}">{{.Title}}</a></h2>
+    <div>{{.Created | humanDate}}</div>
+  </article>
+  {{end}}
+{{else}}
+  <p>There is nothing to see yet.</p>
+{{end}}
 {{end}}

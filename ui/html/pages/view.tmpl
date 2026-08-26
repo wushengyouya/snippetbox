@@ -1,0 +1,12 @@
+{{template "base" .}}
+{{define "title"}}Snippet #{{.Snippet.ID}}{{end}}
+{{define "main"}}
+{{with .Snippet}}
+<article>
+  <h1>{{.Title}}</h1>
+  <pre>{{.Content}}</pre>
+  <div>Created: {{.Created | humanDate}}</div>
+  <div>Expires: {{.Expires | humanDate}}</div>
+</article>
+{{end}}
+{{end}}

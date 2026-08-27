@@ -46,24 +46,12 @@ func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request) {
-	// 审查提交的数据是否能转为Form
-	if err := r.ParseForm(); err != nil {
-		app.serverError(w, err)
-		return
-	}
-	// 判断是否提交过期时间
-	expires, err := strconv.Atoi(r.PostForm.Get("expires"))
-	if err != nil {
-		app.serverError(w, err)
+	var form snippetCreateForm
+	if err := app.decodePostForm(r, &form); err != nil {
+		app.clientError(w, http.StatusBadRequest)
 		return
 	}
 
-	// 构建form
-	form := &snippetCreateForm{
-		Title:   r.PostForm.Get("title"),
-		Content: r.PostForm.Get("content"),
-		Expires: expires,
-	}
 	// 校验form的字段是否符合
 	form.CheckField(validator.NotBlank(form.Title), "title", "标题不能为空")
 	form.CheckField(validator.MaxChars(form.Title, 100), "title", "标题长度不能超过100字符")

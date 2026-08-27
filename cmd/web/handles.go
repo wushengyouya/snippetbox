@@ -23,12 +23,14 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(params.ByName("id"))
 	if err != nil || id < 1 {
 		app.notFound(w)
+		app.errorLog.Printf("无效的片段 ID: %d", id)
 		return
 	}
 	snippet, err := app.snippets.Get(int64(id))
 	if err != nil {
 		if errors.Is(err, models.ErrNoRecord) {
 			app.notFound(w)
+			app.errorLog.Println(err)
 			return
 		}
 		app.serverError(w, err)

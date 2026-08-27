@@ -5,7 +5,7 @@
 {{if .Snippets}}
   {{range .Snippets}}
   <article>
-    <h2><a href="/snippet/view?id={{.ID}}">{{.Title}}</a></h2>
+    <h2><a href="/snippet/view/{{.ID}}">{{.Title}}</a></h2>
     <div>{{.Created | humanDate}}</div>
   </article>
   {{end}}

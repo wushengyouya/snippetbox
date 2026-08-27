@@ -23,3 +23,12 @@ ALTER USER 'web'@'localhost' IDENTIFIED BY 'pass';
 INSERT INTO snippets (title, content, created, expires) VALUES
 ('First snippet', 'Hello from the database.', UTC_TIMESTAMP(), DATE_ADD(UTC_TIMESTAMP(), INTERVAL 365 DAY)),
 ('Seven day snippet', 'This record expires in seven days.', UTC_TIMESTAMP(), DATE_ADD(UTC_TIMESTAMP(), INTERVAL 7 DAY));
+
+-- 会话状态
+CREATE TABLE sessions (
+    token CHAR(43) PRIMARY KEY,
+    data BLOB NOT NULL,
+    expiry TIMESTAMP(6) NOT NULL
+);
+
+CREATE INDEX sessions_expiry_idx ON sessions(expiry);

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"database/sql"
 	"flag"
 	"html/template"
@@ -52,7 +53,7 @@ func main() {
 	sessionManager := scs.New()
 	sessionManager.Store = mysqlstore.New(db)
 	sessionManager.Lifetime = 12 * time.Hour
-	sessionManager.Cookie.Secure = false
+	sessionManager.Cookie.Secure = true
 
 	app := &application{
 		snippets:       &models.SnippetModel{DB: db},
@@ -63,14 +64,25 @@ func main() {
 		errorLog:       errorLog,
 	}
 
+	// tls证书加载
+	tlsConfig := tls.Config{
+		MinVersion: tls.VersionTLS12,
+		CurvePreferences: []tls.CurveID{
+			tls.X25519, tls.CurveP256,
+		},
+	}
 	srv := http.Server{
-		Addr:     *addr,
-		Handler:  app.routes(),
-		ErrorLog: errorLog,
+		Addr:         *addr,
+		Handler:      app.routes(),
+		ErrorLog:     errorLog,
+		TLSConfig:    &tlsConfig,
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
 	}
 
-	infoLog.Printf("服务启动于: %s", *addr)
-	errorLog.Fatal(srv.ListenAndServe())
+	infoLog.Printf("服务启动于: https://localhost%s", *addr)
+	errorLog.Fatal(srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem"))
 }
 
 // 打开数据库连接

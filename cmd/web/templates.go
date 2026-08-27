@@ -13,6 +13,7 @@ type templateData struct {
 	Form        any
 	Snippet     *models.Snippet
 	Snippets    []*models.Snippet
+	Flash       string
 }
 
 var templateFunctions = template.FuncMap{

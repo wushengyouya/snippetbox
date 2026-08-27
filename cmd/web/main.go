@@ -7,7 +7,10 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
+	"github.com/alexedwards/scs/mysqlstore"
+	"github.com/alexedwards/scs/v2"
 	"github.com/go-playground/form/v4"
 	_ "github.com/go-sql-driver/mysql"
 	"snippetbox.alexedwards.net/internal/models"
@@ -19,9 +22,11 @@ type application struct {
 	// 页面模版缓存，避免每次请求要获取页面
 	templateCache map[string]*template.Template
 	// 表单解码
-	formDecode *form.Decoder
-	errorLog   *log.Logger
-	infoLog    *log.Logger
+	formDecode     *form.Decoder
+	sessionManager *scs.SessionManager
+
+	errorLog *log.Logger
+	infoLog  *log.Logger
 }
 
 func main() {
@@ -42,12 +47,20 @@ func main() {
 	if err != nil {
 		errorLog.Fatal(err)
 	}
+
+	// 会话状态
+	sessionManager := scs.New()
+	sessionManager.Store = mysqlstore.New(db)
+	sessionManager.Lifetime = 12 * time.Hour
+	sessionManager.Cookie.Secure = false
+
 	app := &application{
-		snippets:      &models.SnippetModel{DB: db},
-		templateCache: templateCache,
-		formDecode:    form.NewDecoder(),
-		infoLog:       infoLog,
-		errorLog:      errorLog,
+		snippets:       &models.SnippetModel{DB: db},
+		templateCache:  templateCache,
+		formDecode:     form.NewDecoder(),
+		sessionManager: sessionManager,
+		infoLog:        infoLog,
+		errorLog:       errorLog,
 	}
 
 	srv := http.Server{

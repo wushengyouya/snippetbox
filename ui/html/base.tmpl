@@ -10,6 +10,7 @@
 <body>
   <header><a href="/">Snippetbox</a></header>
   {{template "nav" .}}
+  {{with .Flash}}<div class="flash">{{.}}</div>{{end}}
   <main>{{template "main" .}}</main>
   <footer>Powered by Go</footer>
 </body>

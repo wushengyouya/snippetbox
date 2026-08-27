@@ -1,0 +1,26 @@
+{{template "base" .}}
+{{define "title"}}Create a New Snippet{{end}}
+{{define "main"}}
+<form action="/snippet/create" method="POST" novalidate>
+  <div>
+    <label>Title</label>
+    {{with .Form.FieldErrors.title}}<div class="error">{{.}}</div>{{end}}
+    <input type="text" name="title" value="{{.Form.Title}}">
+  </div>
+  <div>
+    <label>Content</label>
+    {{with .Form.FieldErrors.content}}<div class="error">{{.}}</div>{{end}}
+    <textarea name="content">{{.Form.Content}}</textarea>
+  </div>
+  <div>
+    <label>Delete in</label>
+    {{with .Form.FieldErrors.expires}}<div class="error">{{.}}</div>{{end}}
+    <select name="expires">
+      <option value="365" {{if eq .Form.Expires 365}}selected{{end}}>One Year</option>
+      <option value="7" {{if eq .Form.Expires 7}}selected{{end}}>One Week</option>
+      <option value="1" {{if eq .Form.Expires 1}}selected{{end}}>One Day</option>
+    </select>
+  </div>
+  <button type="submit">Publish snippet</button>
+</form>
+{{end}}

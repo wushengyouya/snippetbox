@@ -2,10 +2,13 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"net/http"
 	"runtime/debug"
 	"time"
+
+	"github.com/go-playground/form/v4"
 )
 
 // 服务器错误
@@ -45,6 +48,20 @@ func (app *application) render(w http.ResponseWriter, status int, page string, d
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(status)
 	_, _ = buf.WriteTo(w)
+}
+
+func (app *application) decodePostForm(r *http.Request, dst any) error {
+	if err := r.ParseForm(); err != nil {
+		return err
+	}
+	err := app.formDecode.Decode(dst, r.PostForm)
+	if err != nil {
+		var invalidDecoderError *form.InvalidEncodeError
+		if errors.As(err, &invalidDecoderError) {
+			panic(err)
+		}
+	}
+	return nil
 }
 
 func (app *application) newTemplateData(r *http.Request) *templateData {

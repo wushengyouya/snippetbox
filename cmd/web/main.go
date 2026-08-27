@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/go-playground/form/v4"
 	_ "github.com/go-sql-driver/mysql"
 	"snippetbox.alexedwards.net/internal/models"
 )
@@ -17,8 +18,10 @@ type application struct {
 	snippets *models.SnippetModel
 	// 页面模版缓存，避免每次请求要获取页面
 	templateCache map[string]*template.Template
-	errorLog      *log.Logger
-	infoLog       *log.Logger
+	// 表单解码
+	formDecode *form.Decoder
+	errorLog   *log.Logger
+	infoLog    *log.Logger
 }
 
 func main() {
@@ -42,6 +45,7 @@ func main() {
 	app := &application{
 		snippets:      &models.SnippetModel{DB: db},
 		templateCache: templateCache,
+		formDecode:    form.NewDecoder(),
 		infoLog:       infoLog,
 		errorLog:      errorLog,
 	}

@@ -20,6 +20,7 @@ import (
 type application struct {
 	// 数据操纵model
 	snippets *models.SnippetModel
+	users    *models.UserModel
 	// 页面模版缓存，避免每次请求要获取页面
 	templateCache map[string]*template.Template
 	// 表单解码
@@ -57,6 +58,7 @@ func main() {
 
 	app := &application{
 		snippets:       &models.SnippetModel{DB: db},
+		users:          &models.UserModel{DB: db},
 		templateCache:  templateCache,
 		formDecode:     form.NewDecoder(),
 		sessionManager: sessionManager,

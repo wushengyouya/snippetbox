@@ -2,10 +2,12 @@ package main
 
 import (
 	"html/template"
+	"io/fs"
 	"path/filepath"
 	"time"
 
 	"snippetbox.alexedwards.net/internal/models"
+	"snippetbox.alexedwards.net/ui"
 )
 
 type templateData struct {
@@ -31,22 +33,15 @@ func humanDate(t time.Time) string {
 
 func newTemplateCache() (map[string]*template.Template, error) {
 	cache := map[string]*template.Template{}
-	pages, err := filepath.Glob("./ui/html/pages/*.tmpl")
-	if err != nil {
-		return nil, err
-	}
-	partials, err := filepath.Glob("./ui/html/partials/*.tmpl")
+	pages, err := fs.Glob(ui.Files, "html/pages/*.tmpl")
 	if err != nil {
 		return nil, err
 	}
 
 	for _, page := range pages {
 		name := filepath.Base(page)
-		patterns := []string{"./ui/html/base.tmpl"}
-		patterns = append(patterns, partials...)
-		patterns = append(patterns, page)
-
-		ts, err := template.New(name).Funcs(templateFunctions).ParseFiles(patterns...)
+		patterns := []string{"html/base.tmpl", "html/partials/*.tmpl", page}
+		ts, err := template.New(name).Funcs(templateFunctions).ParseFS(ui.Files, patterns...)
 		if err != nil {
 			return nil, err
 		}

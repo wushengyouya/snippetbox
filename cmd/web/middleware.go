@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -55,5 +56,34 @@ func (app *application) requireAuthentication(next http.Handler) http.Handler {
 		}
 		w.Header().Set("Cache-Control", "no-store")
 		next.ServeHTTP(w, r)
+	})
+}
+
+func (app *application) authenticate(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		id := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
+		// 还未登录
+		if id == 0 {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		// 已登录
+		exists, err := app.users.Exists(id)
+		if err != nil {
+			app.serverError(w, err)
+			return
+		}
+
+		// 用户不存在
+		if !exists {
+			app.sessionManager.Remove(r.Context(), "authenticatedUserID")
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), isAuthenticatedContextKey, true)
+		next.ServeHTTP(w, r.WithContext(ctx))
+
 	})
 }

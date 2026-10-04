@@ -6,6 +6,7 @@
     <label>Title</label>
     {{with .Form.FieldErrors.title}}<div class="error">{{.}}</div>{{end}}
     <input type="text" name="title" value="{{.Form.Title}}">
+    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
   </div>
   <div>
     <label>Content</label>

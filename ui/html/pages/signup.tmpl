@@ -13,7 +13,7 @@
   <label>Password</label>
   {{with .Form.FieldErrors.password}}<div class="error">{{.}}</div>{{end}}
   <input type="password" name="password">
-
+  <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
   <button type="submit">Signup</button>
 </form>
 {{end}}

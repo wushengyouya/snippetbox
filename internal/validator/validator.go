@@ -2,6 +2,7 @@ package validator
 
 import (
 	"regexp"
+	"slices"
 	"unicode/utf8"
 )
 
@@ -47,13 +48,8 @@ func MinChars(value string, n int) bool {
 	return utf8.RuneCountInString(value) >= n
 }
 
-func PermittedInt(value int, values ...int) bool {
-	for _, permitted := range values {
-		if value == permitted {
-			return true
-		}
-	}
-	return false
+func PermittedValue[T comparable](value T, values ...T) bool {
+	return slices.Contains(values, value)
 }
 
 func (v *Validator) AddNonFieldError(message string) {

@@ -15,9 +15,10 @@ CREATE TABLE snippets (
 
 CREATE INDEX idx_snippets_created ON snippets(created);
 
-CREATE USER 'web'@'localhost';
-GRANT SELECT, INSERT, UPDATE, DELETE ON snippetbox.* TO 'web'@'localhost';
-ALTER USER 'web'@'localhost' IDENTIFIED BY 'pass';
+-- 使用 '%' 允许任意来源连接（Docker 端口映射进来的连接不属于 localhost）
+CREATE USER 'web'@'%';
+GRANT SELECT, INSERT, UPDATE, DELETE ON snippetbox.* TO 'web'@'%';
+ALTER USER 'web'@'%' IDENTIFIED BY 'pass';
 
 -- 插入数据
 INSERT INTO snippets (title, content, created, expires) VALUES

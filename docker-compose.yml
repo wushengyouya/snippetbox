@@ -1,0 +1,24 @@
+services:
+  db:
+    image: mysql:8.4
+    container_name: snippetbox-db
+    restart: unless-stopped
+    ports:
+      # 映射到宿主机 13306，与 cmd/web/main.go 中默认 DSN 保持一致
+      - "13306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      # 不设置 MYSQL_DATABASE，由初始化脚本 sql/data.sql 自行创建
+    volumes:
+      - snippetbox-mysql:/var/lib/mysql
+      # 首次启动（数据卷为空）时自动执行建库建表脚本
+      - ./sql/data.sql:/docker-entrypoint-initdb.d/data.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+volumes:
+  snippetbox-mysql:

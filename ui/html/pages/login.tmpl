@@ -1,0 +1,15 @@
+{{template "base" .}}
+{{define "title"}}Login{{end}}
+{{define "main"}}
+<form action="/user/login" method="POST" novalidate>
+  {{range .Form.NonFieldErrors}}<div class="error">{{.}}</div>{{end}}
+  <label>Email</label>
+  {{with .Form.FieldErrors.email}}<div class="error">{{.}}</div>{{end}}
+  <input type="email" name="email" value="{{.Form.Email}}">
+
+  <label>Password</label>
+  {{with .Form.FieldErrors.password}}<div class="error">{{.}}</div>{{end}}
+  <input type="password" name="password">
+  <button type="submit">Login</button>
+</form>
+{{end}}
